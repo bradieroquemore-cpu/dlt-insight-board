@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
 const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.PORT || 5173);
 const API =
@@ -698,6 +699,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`大乐透分析站已启动：http://localhost:${PORT}`);
-});
+export { getHistory, getPublicSamples, getDouyinSamples };
+
+if (process.argv[1] === __filename) {
+  server.listen(PORT, () => {
+    console.log(`大乐透分析站已启动：http://localhost:${PORT}`);
+  });
+}

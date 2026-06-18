@@ -12,7 +12,26 @@ npm start
 
 ## 部署到长期网址
 
-这个项目有 Node 后端接口，建议部署到 Render、Railway 或 Fly.io 这类 Web Service。
+当前仓库同时支持两种部署方式：
+
+- GitHub Pages：固定公开网址，使用 GitHub Actions 每 15 分钟生成一次静态数据。
+- Render / Railway：完整 Node 后端实时接口，适合后续要更强抓取能力时使用。
+
+### GitHub Pages
+
+推送到 `main` 后，`.github/workflows/pages.yml` 会自动运行：
+
+1. 调用 `node scripts/generate-data.js` 生成 `data/*.json`。
+2. 发布到 GitHub Pages。
+3. 每 15 分钟按计划重新发布一次，刷新历史开奖、公开网页样本和抖音公开索引摘要。
+
+固定地址格式：
+
+```text
+https://bradieroquemore-cpu.github.io/dlt-insight-board/
+```
+
+线上静态版无法直接读取用户电脑里的 Chrome 抖音标签页；需要把抖音图文文案、分享链接文字或截图 OCR 文本粘贴到页面里，浏览器会本地即时解析。
 
 ### Render
 

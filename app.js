@@ -1,6 +1,8 @@
-const HISTORY_API = "/api/history";
-const PUBLIC_SAMPLE_API = "/api/public-samples";
-const DOUYIN_SAMPLE_API = "/api/douyin-samples";
+const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
+const HISTORY_API = IS_GITHUB_PAGES ? null : "/api/history";
+const PUBLIC_SAMPLE_API = IS_GITHUB_PAGES ? null : "/api/public-samples";
+const DOUYIN_SAMPLE_API = IS_GITHUB_PAGES ? null : "/api/douyin-samples";
+const STATIC_DATA_BASE = "./data/";
 const FRONT_MAX = 35;
 const BACK_MAX = 12;
 const COMBO_COUNT = 2;
@@ -103,6 +105,24 @@ function parseDraw(raw) {
     back: nums.slice(5, 7),
     pool: raw.poolBalanceAfterdraw || raw.poolBalance || "--"
   };
+}
+
+async function fetchJson(primaryUrl, fallbackUrl, options = {}) {
+  if (primaryUrl) {
+    try {
+      const response = await fetch(primaryUrl, options);
+      if (response.ok) return response.json();
+      const errorJson = await response.json().catch(() => ({}));
+      throw new Error(errorJson.error || `请求失败：HTTP ${response.status}`);
+    } catch (error) {
+      if (!fallbackUrl) throw error;
+    }
+  }
+
+  if (!fallbackUrl) throw new Error("当前部署环境没有可用的数据接口");
+  const response = await fetch(`${fallbackUrl}?v=${Date.now()}`);
+  if (!response.ok) throw new Error(`静态数据读取失败：HTTP ${response.status}`);
+  return response.json();
 }
 
 function nextIssue(issue) {
@@ -369,12 +389,14 @@ async function loadData() {
   el.refreshBtn.disabled = true;
 
   try {
-    const response = await fetch(`${HISTORY_API}?limit=${limit}`);
-    if (!response.ok) throw new Error((await response.json()).error || "请求失败");
-    const json = await response.json();
+    const json = await fetchJson(
+      HISTORY_API ? `${HISTORY_API}?limit=${limit}` : null,
+      `${STATIC_DATA_BASE}history-${limit}.json`
+    );
     state.draws = json.list.map(parseDraw);
     el.dataStatus.textContent = "数据已更新";
-    el.dataMeta.textContent = `${json.source} · ${new Date(json.fetchedAt).toLocaleString("zh-CN")}`;
+    const fetchedAt = json.staticGeneratedAt || json.fetchedAt;
+    el.dataMeta.textContent = `${json.source} · ${new Date(fetchedAt).toLocaleString("zh-CN")}`;
   } catch (error) {
     state.draws = fallback.map(parseDraw);
     el.dataStatus.textContent = "使用兜底样例";
@@ -471,6 +493,66 @@ function renderSampleResult(target, data, emptyText = "暂未采到有效样本"
     </div>
     <div class="source-list">${sourceLinks || "<span class=\"score\">可粘贴抖音分享链接、图文文案或截图 OCR 文本后再试。</span>"}</div>
   `;
+}
+
+function countSampleNumbers(samples, key, max) {
+  const counts = new Map(Array.from({ length: max }, (_, index) => [index + 1, 0]));
+  samples.forEach((sample) => {
+    sample[key].forEach((n) => counts.set(n, counts.get(n) + 1));
+  });
+  return [...counts.entries()]
+    .filter(([, count]) => count > 0)
+    .map(([n, count]) => ({ n, count }))
+    .sort((a, b) => b.count - a.count || a.n - b.n);
+}
+
+function summarizeTextSamples(issue, text, title) {
+  const samples = text
+    .split(/\n+/)
+    .map(parseCrowdLine)
+    .filter((sample) => sample && sample.front.length === 5 && sample.back.length === 2);
+
+  if (!samples.length) {
+    return {
+      issue,
+      sourceCount: 0,
+      mentionCount: 0,
+      avoidFront: [],
+      avoidBack: [],
+      sources: []
+    };
+  }
+
+  return {
+    issue,
+    sourceCount: 1,
+    mentionCount: samples.length,
+    avoidFront: countSampleNumbers(samples, "front", FRONT_MAX).slice(0, 8),
+    avoidBack: countSampleNumbers(samples, "back", BACK_MAX).slice(0, 4),
+    sources: [{ title, source: "手动导入", mentions: samples.length }]
+  };
+}
+
+function mergeNumberCounts(...groups) {
+  const counts = new Map();
+  groups.flat().forEach((item) => {
+    counts.set(item.n, (counts.get(item.n) || 0) + item.count);
+  });
+  return [...counts.entries()]
+    .map(([n, count]) => ({ n, count }))
+    .sort((a, b) => b.count - a.count || a.n - b.n);
+}
+
+function mergeSampleData(issue, base, pasted) {
+  return {
+    issue,
+    sourceCount: (base.sourceCount || 0) + (pasted.sourceCount || 0),
+    mentionCount: (base.mentionCount || 0) + (pasted.mentionCount || 0),
+    avoidFront: mergeNumberCounts(base.avoidFront || [], pasted.avoidFront || []).slice(0, 8),
+    avoidBack: mergeNumberCounts(base.avoidBack || [], pasted.avoidBack || []).slice(0, 4),
+    sources: [...(base.sources || []), ...(pasted.sources || [])],
+    sourceNote: base.sourceNote || "GitHub Pages 静态数据每 15 分钟更新；粘贴内容会在浏览器本地即时解析。"
+  };
 }
 
 function parseMachinePicks(text) {
@@ -691,9 +773,10 @@ async function loadPublicSamples() {
   el.publicCrowdResult.innerHTML = `<span class="mini-title">正在抓取第 ${issue} 期公开网页样本...</span>`;
 
   try {
-    const response = await fetch(`${PUBLIC_SAMPLE_API}?issue=${issue}`);
-    if (!response.ok) throw new Error((await response.json()).error || "公开样本抓取失败");
-    const data = await response.json();
+    const data = await fetchJson(
+      PUBLIC_SAMPLE_API ? `${PUBLIC_SAMPLE_API}?issue=${issue}` : null,
+      `${STATIC_DATA_BASE}public-samples.json`
+    );
     state.publicCrowd = data;
     renderPublicCrowd(data);
     generateCombos();
@@ -714,13 +797,7 @@ async function loadDouyinSamples() {
   el.douyinResult.innerHTML = `<span class="mini-title">正在尝试抖音公开搜索，并解析你粘贴的内容...</span>`;
 
   try {
-    const response = await fetch(`${DOUYIN_SAMPLE_API}?issue=${issue}&refresh=${Date.now()}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: el.douyinInput.value })
-    });
-    if (!response.ok) throw new Error((await response.json()).error || "抖音样本分析失败");
-    const data = await response.json();
+    const data = await fetchDouyinData(issue);
     state.douyinCrowd = data;
     el.douyinStatus.textContent = data.sourceCount > 0 ? `避让 ${data.avoidFront.length + data.avoidBack.length} 个` : "需粘贴";
     renderSampleResult(el.douyinResult, data, "抖音公开搜索被平台校验拦截，未采到可解析图文");
@@ -732,6 +809,24 @@ async function loadDouyinSamples() {
   } finally {
     el.douyinScanBtn.disabled = false;
   }
+}
+
+async function fetchDouyinData(issue) {
+  if (DOUYIN_SAMPLE_API) {
+    try {
+      return await fetchJson(`${DOUYIN_SAMPLE_API}?issue=${issue}&refresh=${Date.now()}`, null, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: el.douyinInput.value })
+      });
+    } catch {
+      // Static hosts such as GitHub Pages cannot handle POST APIs.
+    }
+  }
+
+  const staticData = await fetchJson(null, `${STATIC_DATA_BASE}douyin-samples.json`);
+  const pasted = summarizeTextSamples(issue, el.douyinInput.value, "粘贴的抖音图文/评论/OCR 文本");
+  return mergeSampleData(issue, staticData, pasted);
 }
 
 function parseCrowdLine(line) {
