@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: dlt-insight-board
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22

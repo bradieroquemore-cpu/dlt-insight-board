@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>大乐透趋势分析台</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Super Lotto 35 + 12</p>
+          <h1 id="page-title">大乐透趋势分析台</h1>
+          <p class="lede">基于公开历史开奖数据做频次、遗漏、趋势和组合生成，仅作统计参考。</p>
+        </div>
+        <div class="status-panel" aria-live="polite">
+          <span class="pulse" aria-hidden="true"></span>
+          <div>
+            <strong id="dataStatus">正在连接数据源</strong>
+            <span id="dataMeta">体彩公开开奖接口</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="分析设置">
+        <label>
+          数据范围
+          <select id="rangeSelect">
+            <option value="90">近 90 期</option>
+            <option value="180" selected>近 180 期</option>
+            <option value="360">近 360 期</option>
+            <option value="720">近 720 期</option>
+          </select>
+        </label>
+        <label>
+          趋势窗口
+          <select id="windowSelect">
+            <option value="20">近 20 期</option>
+            <option value="30" selected>近 30 期</option>
+            <option value="50">近 50 期</option>
+          </select>
+        </label>
+        <button id="refreshBtn" type="button">刷新数据</button>
+        <button id="generateBtn" type="button" class="primary">重算组合</button>
+        <div class="auto-chip" aria-live="polite">
+          <span class="pulse mini" aria-hidden="true"></span>
+          <span id="autoUpdateStatus">15 分钟自动更新</span>
+        </div>
+      </section>
+
+      <section class="draw-strip" aria-label="最新开奖">
+        <div>
+          <span class="label">最新开奖</span>
+          <strong id="latestIssue">--</strong>
+          <span id="latestDate">--</span>
+        </div>
+        <div class="balls" id="latestBalls"></div>
+        <div class="pool">
+          <span>奖池</span>
+          <strong id="poolBalance">--</strong>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel heat-panel">
+          <div class="panel-head">
+            <div>
+              <h2>前区热度图</h2>
+              <p>颜色越深，近期综合评分越高。</p>
+            </div>
+            <span id="frontSummary" class="tag">--</span>
+          </div>
+          <div id="frontHeatmap" class="heatmap front-map"></div>
+        </article>
+
+        <article class="panel heat-panel">
+          <div class="panel-head">
+            <div>
+              <h2>后区热度图</h2>
+              <p>结合频次、趋势和遗漏。</p>
+            </div>
+            <span id="backSummary" class="tag">--</span>
+          </div>
+          <div id="backHeatmap" class="heatmap back-map"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>下期热门</h2>
+              <p>热号优先展示，同时保留均衡度。</p>
+            </div>
+          </div>
+          <div class="rank-list" id="hotList"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>杀号参考</h2>
+              <p>低活跃、长遗漏和近期弱势号码。</p>
+            </div>
+          </div>
+          <div class="kill-zone">
+            <div>
+              <span class="label">前区候选</span>
+              <div id="frontKill" class="balls compact"></div>
+            </div>
+            <div>
+              <span class="label">后区候选</span>
+              <div id="backKill" class="balls compact"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel combo-panel">
+          <div class="panel-head">
+            <div>
+              <h2>排列组合</h2>
+              <p>按热稳冷混合、奇偶和区间分布生成。</p>
+            </div>
+            <span class="tag">2 注参考</span>
+          </div>
+          <div id="comboList" class="combo-list"></div>
+        </article>
+
+        <article class="panel metrics-panel">
+          <div class="panel-head">
+            <div>
+              <h2>形态仪表</h2>
+              <p>最近窗口的和值、奇偶、大小倾向。</p>
+            </div>
+          </div>
+          <div class="metrics" id="metrics"></div>
+        </article>
+      </section>
+
+      <section class="wide-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>公开热买避让</h2>
+              <p>抓取公开网页里分享、推荐、晒出的号码，出现多的优先避开。</p>
+            </div>
+            <span class="tag" id="publicCrowdStatus">未抓取</span>
+          </div>
+          <div class="inline-actions top-actions">
+            <button id="publicScanBtn" type="button">抓取公开样本</button>
+          </div>
+          <div id="publicCrowdResult" class="crowd-result"></div>
+          <div class="splitter"></div>
+          <div class="panel-head compact-head">
+            <div>
+              <h2>抖音图文</h2>
+              <p>优先读取 Chrome 已打开的抖音搜索/图文页；也可粘贴分享链接、文案或 OCR 文本。</p>
+            </div>
+            <span class="tag" id="douyinStatus">未抓取</span>
+          </div>
+          <textarea id="douyinInput" rows="4" spellcheck="false" placeholder="粘贴抖音分享链接、图文文案或截图 OCR 文本，例如：前区03 07 18 24 30 后区04 12 已买"></textarea>
+          <div class="inline-actions">
+            <button id="douyinScanBtn" type="button">读取 Chrome / 分析抖音</button>
+            <button id="clearDouyinBtn" type="button" class="ghost">清空</button>
+          </div>
+          <div id="douyinResult" class="crowd-result"></div>
+          <div class="splitter"></div>
+          <div class="panel-head compact-head">
+            <div>
+              <h2>手动样本</h2>
+              <p>把贴吧、群聊、截图转文字后的号码贴进来，也会统计为避热参考。</p>
+            </div>
+          </div>
+          <textarea id="crowdInput" rows="5" spellcheck="false" placeholder="示例：01 07 12 20 31 + 03 09，每行一组"></textarea>
+          <div class="inline-actions">
+            <button id="analyzeCrowdBtn" type="button">分析样本</button>
+            <button id="clearCrowdBtn" type="button" class="ghost">清空</button>
+          </div>
+          <div id="crowdResult" class="crowd-result"></div>
+          <div class="splitter"></div>
+          <div class="panel-head compact-head">
+            <div>
+              <h2>机选十组反推</h2>
+              <p>粘贴店家随机 10 注，每注最多借 0-2 个号，再重组为 2 注。</p>
+            </div>
+            <span class="tag" id="machineStatus">未分析</span>
+          </div>
+          <textarea id="machineInput" rows="6" spellcheck="false" placeholder="每行一注，例如：03 07 18 24 30 + 04 12，建议贴满 10 注"></textarea>
+          <div class="inline-actions">
+            <button id="machineAnalyzeBtn" type="button">生成 2 注反推</button>
+            <button id="clearMachineBtn" type="button" class="ghost">清空</button>
+          </div>
+          <div id="machineResult" class="crowd-result"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>资讯推荐</h2>
+              <p>开奖、走势图和数据大厅入口。</p>
+            </div>
+          </div>
+          <div class="links">
+            <a href="https://www.sporttery.cn/zst/dlt/" target="_blank" rel="noreferrer">竞彩网大乐透历史开奖</a>
+            <a href="https://www.lottery.gov.cn/dlt/" target="_blank" rel="noreferrer">中国体彩网大乐透专区</a>
+            <a href="https://trade.500.com/dlt/" target="_blank" rel="noreferrer">500彩票网数据大厅</a>
+            <a href="https://lotto.sina.cn/" target="_blank" rel="noreferrer">新浪彩票资讯</a>
+          </div>
+        </article>
+      </section>
+
+      <p class="disclaimer">
+        数据源：中国体彩网公开开奖数据、公开网页文本采样。重要提示：大乐透开奖结果是随机事件。本页面不提供投注入口，不读取官方投注分布，不保证命中，也不建议加大投入；请量力而行。
+      </p>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
