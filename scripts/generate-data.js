@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { getDouyinSamples, getHistory, getPublicSamples } from "../server.js";
 
 const DATA_DIR = new URL("../data/", import.meta.url);
@@ -8,12 +8,29 @@ async function writeJson(name, payload) {
   await writeFile(new URL(name, DATA_DIR), `${JSON.stringify(payload, null, 2)}\n`);
 }
 
+async function readExistingJson(name) {
+  return JSON.parse(await readFile(new URL(name, DATA_DIR), "utf8"));
+}
+
+async function getHistoryWithFallback(limit) {
+  try {
+    return await getHistory(limit);
+  } catch (error) {
+    const existing = await readExistingJson(`history-${limit}.json`);
+    return {
+      ...existing,
+      source: `${existing.source || "静态历史开奖数据"}（接口暂不可用，沿用上次生成结果）`,
+      fetchError: error.message
+    };
+  }
+}
+
 async function main() {
   await mkdir(DATA_DIR, { recursive: true });
 
   const histories = new Map();
   for (const limit of HISTORY_LIMITS) {
-    const history = await getHistory(limit);
+    const history = await getHistoryWithFallback(limit);
     histories.set(limit, history);
     await writeJson(`history-${limit}.json`, {
       ...history,
