@@ -7,6 +7,12 @@ const FRONT_MAX = 35;
 const BACK_MAX = 12;
 const COMBO_COUNT = 2;
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
+const PROBABILITY_METHODS = [
+  { id: "uniform", label: "随机基线", weight: 0.15 },
+  { id: "bayes", label: "贝叶斯长频", weight: 0.3 },
+  { id: "ema", label: "指数近期", weight: 0.4 },
+  { id: "miss", label: "遗漏修正", weight: 0.15 }
+];
 const FRONT_BANDS = [
   { name: "01-07", min: 1, max: 7 },
   { name: "08-14", min: 8, max: 14 },
@@ -50,6 +56,10 @@ const el = {
   hotList: document.querySelector("#hotList"),
   frontKill: document.querySelector("#frontKill"),
   backKill: document.querySelector("#backKill"),
+  probabilityMeta: document.querySelector("#probabilityMeta"),
+  probabilityMethods: document.querySelector("#probabilityMethods"),
+  frontProbability: document.querySelector("#frontProbability"),
+  backProbability: document.querySelector("#backProbability"),
   comboList: document.querySelector("#comboList"),
   metrics: document.querySelector("#metrics"),
   publicScanBtn: document.querySelector("#publicScanBtn"),
@@ -153,6 +163,10 @@ function normalize(value, max) {
   return value / max;
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 function bandFor(number, bands) {
   return bands.find((band) => number >= band.min && number <= band.max);
 }
@@ -194,10 +208,108 @@ function scoreSet(draws, max, key, recentSize) {
   });
 }
 
+function uniformProbability(max, slots) {
+  const base = slots / max;
+  return Array.from({ length: max }, (_, index) => ({ n: index + 1, value: base }));
+}
+
+function bayesProbability(draws, max, key, slots, alpha = 1) {
+  const counts = countNumbers(draws, max, key);
+  const totalSlots = draws.length * slots;
+  return Array.from({ length: max }, (_, index) => {
+    const n = index + 1;
+    return {
+      n,
+      value: ((counts.get(n) + alpha) / (totalSlots + alpha * max)) * slots
+    };
+  });
+}
+
+function exponentialProbability(draws, max, key, slots, halfLife = 28) {
+  const counts = new Map(Array.from({ length: max }, (_, index) => [index + 1, 0]));
+  let weightTotal = 0;
+
+  draws.forEach((draw, index) => {
+    const weight = Math.pow(0.5, index / halfLife);
+    weightTotal += weight;
+    draw[key].forEach((n) => counts.set(n, counts.get(n) + weight));
+  });
+
+  return Array.from({ length: max }, (_, index) => {
+    const n = index + 1;
+    return {
+      n,
+      value: counts.get(n) / Math.max(weightTotal, 1)
+    };
+  });
+}
+
+function omissionProbability(draws, max, key, slots) {
+  const miss = lastSeen(draws, max, key);
+  const base = slots / max;
+  const expectedGap = Math.max(1, (max - slots) / slots);
+  const raw = Array.from({ length: max }, (_, index) => {
+    const n = index + 1;
+    const gap = miss.get(n);
+    const gapSignal = Math.tanh((gap - expectedGap) / expectedGap);
+    const repeatPenalty = gap === 0 ? 0.05 : 0;
+    return {
+      n,
+      value: base * clamp(1 + gapSignal * 0.18 - repeatPenalty, 0.72, 1.28)
+    };
+  });
+  return normalizeProbabilities(raw, slots);
+}
+
+function normalizeProbabilities(items, slots) {
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+  return items.map((item) => ({
+    ...item,
+    value: total ? (item.value / total) * slots : slots / items.length
+  }));
+}
+
+function valueMap(items) {
+  return new Map(items.map((item) => [item.n, item.value]));
+}
+
+function probabilitySet(draws, max, key, slots) {
+  const methodValues = {
+    uniform: uniformProbability(max, slots),
+    bayes: bayesProbability(draws, max, key, slots),
+    ema: exponentialProbability(draws, max, key, slots),
+    miss: omissionProbability(draws, max, key, slots)
+  };
+  const methodMaps = Object.fromEntries(Object.entries(methodValues).map(([id, items]) => [id, valueMap(items)]));
+  const combined = normalizeProbabilities(
+    Array.from({ length: max }, (_, index) => {
+      const n = index + 1;
+      const raw = PROBABILITY_METHODS.reduce((sum, method) => sum + method.weight * methodMaps[method.id].get(n), 0);
+      return { n, value: raw };
+    }),
+    slots
+  );
+
+  return combined
+    .map((item) => ({
+      n: item.n,
+      probability: item.value,
+      percent: item.value * 100,
+      basePercent: (slots / max) * 100,
+      bayesPercent: methodMaps.bayes.get(item.n) * 100,
+      emaPercent: methodMaps.ema.get(item.n) * 100,
+      missPercent: methodMaps.miss.get(item.n) * 100
+    }))
+    .sort((a, b) => b.probability - a.probability || a.n - b.n)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
+}
+
 function analyze(draws) {
   const windowSize = Number(el.windowSelect.value);
   const front = scoreSet(draws, FRONT_MAX, "front", windowSize);
   const back = scoreSet(draws, BACK_MAX, "back", windowSize);
+  const frontProbability = probabilitySet(draws, FRONT_MAX, "front", 5);
+  const backProbability = probabilitySet(draws, BACK_MAX, "back", 2);
   const recent = draws.slice(0, Math.min(windowSize, draws.length));
   const sums = recent.map((draw) => draw.front.reduce((a, b) => a + b, 0));
   const oddFront = recent.flatMap((draw) => draw.front).filter((n) => n % 2).length;
@@ -210,6 +322,8 @@ function analyze(draws) {
     hotBack: [...back].sort((a, b) => b.heat - a.heat).slice(0, 5),
     killFront: [...front].sort((a, b) => b.weak - a.weak).slice(0, 7),
     killBack: [...back].sort((a, b) => b.weak - a.weak).slice(0, 3),
+    frontProbability,
+    backProbability,
     metrics: {
       avgSum: Math.round(sums.reduce((a, b) => a + b, 0) / Math.max(sums.length, 1)),
       oddRate: oddFront / Math.max(recent.length * 5, 1),
@@ -245,6 +359,36 @@ function renderRank() {
       <span class="score">${Math.round(item.heat * 100)}</span>
     </div>`)
     .join("");
+}
+
+function renderProbabilityList(target, items, type, topCount) {
+  const maxPercent = Math.max(...items.map((item) => item.percent));
+  target.innerHTML = items
+    .map((item) => {
+      const isTop = item.rank <= topCount;
+      const width = Math.max(16, Math.round(normalize(item.percent, maxPercent) * 100));
+      return `<div class="prob-row ${type} ${isTop ? "top-prob" : ""}" style="--w:${width}%">
+        <span class="prob-rank">${item.rank}</span>
+        ${ball(item.n, type)}
+        <div class="prob-main">
+          <div class="prob-line"><span></span></div>
+          <span class="prob-detail">贝叶斯 ${item.bayesPercent.toFixed(2)}% / 近期 ${item.emaPercent.toFixed(2)}% / 遗漏 ${item.missPercent.toFixed(2)}%</span>
+        </div>
+        <strong>${item.percent.toFixed(2)}%</strong>
+      </div>`;
+    })
+    .join("");
+}
+
+function renderProbabilityBoard() {
+  const frontTop = state.analysis.frontProbability.slice(0, 5).map((item) => pad(item.n)).join(" ");
+  const backTop = state.analysis.backProbability.slice(0, 2).map((item) => pad(item.n)).join(" ");
+  el.probabilityMeta.textContent = `前 ${frontTop} / 后 ${backTop}`;
+  el.probabilityMethods.innerHTML = PROBABILITY_METHODS.map(
+    (method) => `<span><strong>${Math.round(method.weight * 100)}%</strong>${method.label}</span>`
+  ).join("");
+  renderProbabilityList(el.frontProbability, state.analysis.frontProbability, "front", 5);
+  renderProbabilityList(el.backProbability, state.analysis.backProbability, "back", 2);
 }
 
 function pickWeighted(pool, count, avoid = []) {
@@ -374,6 +518,7 @@ function render() {
   el.frontSummary.textContent = `热号 ${state.analysis.hotFront.slice(0, 3).map((x) => pad(x.n)).join(" ")}`;
   el.backSummary.textContent = `热号 ${state.analysis.hotBack.slice(0, 2).map((x) => pad(x.n)).join(" ")}`;
   renderRank();
+  renderProbabilityBoard();
   el.frontKill.innerHTML = state.analysis.killFront.map((item) => ball(item.n, "front")).join("");
   el.backKill.innerHTML = state.analysis.killBack.map((item) => ball(item.n, "back")).join("");
   generateCombos();

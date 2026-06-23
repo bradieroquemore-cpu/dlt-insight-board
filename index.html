@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>大乐透趋势分析台</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260623-probability" />
   </head>
   <body>
     <main class="shell">
@@ -114,6 +114,33 @@
           </div>
         </article>
 
+        <article class="panel probability-panel">
+          <div class="panel-head">
+            <div>
+              <h2>下期概率排序</h2>
+              <p>综合随机基线、贝叶斯频次、指数近期权重和轻量遗漏修正。</p>
+            </div>
+            <span class="tag" id="probabilityMeta">模型概率</span>
+          </div>
+          <div class="method-strip" id="probabilityMethods"></div>
+          <div class="probability-board">
+            <div>
+              <div class="subhead">
+                <span>前区 35 码</span>
+                <strong>Top 5 加深</strong>
+              </div>
+              <div class="probability-list" id="frontProbability"></div>
+            </div>
+            <div>
+              <div class="subhead">
+                <span>后区 12 码</span>
+                <strong>Top 2 加深</strong>
+              </div>
+              <div class="probability-list back-probability" id="backProbability"></div>
+            </div>
+          </div>
+        </article>
+
         <article class="panel combo-panel">
           <div class="panel-head">
             <div>
@@ -213,6 +240,6 @@
       </p>
     </main>
 
-    <script src="./app.js" type="module"></script>
+    <script src="./app.js?v=20260623-probability" type="module"></script>
   </body>
 </html>

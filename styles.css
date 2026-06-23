@@ -368,11 +368,16 @@ h2 {
   order: 4;
 }
 
-.metrics-panel {
+.probability-panel {
+  grid-column: 1 / -1;
   order: 3;
 }
 
-.grid > .panel:not(.heat-panel):not(.combo-panel) {
+.metrics-panel {
+  order: 4;
+}
+
+.grid > .panel:not(.heat-panel):not(.combo-panel):not(.probability-panel) {
   grid-column: span 2;
 }
 
@@ -483,6 +488,155 @@ h2 {
 .score {
   color: var(--muted);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.method-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.method-strip span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #0d0f0b;
+  color: var(--muted);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.method-strip strong {
+  margin-right: 6px;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+
+.probability-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+  gap: 16px;
+}
+
+.subhead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.subhead strong {
+  color: var(--gold);
+}
+
+.probability-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.back-probability {
+  grid-template-columns: 1fr;
+}
+
+.prob-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px 34px minmax(0, 1fr) 64px;
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: #0d0f0b;
+  padding: 8px;
+}
+
+.prob-row::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--w);
+  background: linear-gradient(90deg, rgba(255, 79, 69, 0.18), transparent);
+  content: "";
+}
+
+.prob-row.back::before {
+  background: linear-gradient(90deg, rgba(55, 184, 255, 0.18), transparent);
+}
+
+.prob-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+.prob-row.top-prob {
+  border-color: var(--red);
+  background: #21110f;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.prob-row.back.top-prob {
+  border-color: var(--blue);
+  background: #0b1822;
+}
+
+.prob-row.top-prob::before {
+  background: linear-gradient(90deg, rgba(199, 43, 37, 0.72), rgba(255, 79, 69, 0.18));
+}
+
+.prob-row.back.top-prob::before {
+  background: linear-gradient(90deg, rgba(15, 114, 182, 0.76), rgba(55, 184, 255, 0.18));
+}
+
+.prob-rank {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.prob-main {
+  min-width: 0;
+}
+
+.prob-line {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(247, 243, 218, 0.08);
+}
+
+.prob-line span {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--red), var(--gold));
+}
+
+.prob-row.back .prob-line span {
+  background: linear-gradient(90deg, var(--blue), var(--green));
+}
+
+.prob-detail {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prob-row strong {
+  justify-self: end;
+  color: var(--ink);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -678,6 +832,7 @@ h2 {
 
   .heat-panel,
   .combo-panel,
+  .probability-panel,
   .grid > .panel:not(.heat-panel):not(.combo-panel) {
     grid-column: span 2;
   }
@@ -722,16 +877,17 @@ h2 {
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
   .heat-panel,
-  .combo-panel {
-    grid-column: span 1;
+  .combo-panel,
+  .probability-panel {
+    grid-column: 1 / -1 !important;
   }
 
   .grid > .panel:not(.heat-panel):not(.combo-panel) {
-    grid-column: span 1;
+    grid-column: 1 / -1 !important;
   }
 
   .front-map {
@@ -744,6 +900,19 @@ h2 {
 
   .combo {
     grid-template-columns: 1fr;
+  }
+
+  .probability-board,
+  .probability-list {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .prob-row {
+    grid-template-columns: 22px 34px minmax(0, 1fr) 58px;
+  }
+
+  .prob-detail {
+    white-space: normal;
   }
 
   .sample-grid {
