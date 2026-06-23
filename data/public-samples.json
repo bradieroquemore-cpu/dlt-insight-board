@@ -1,46 +1,46 @@
 {
-  "issue": "26068",
-  "fetchedAt": "2026-06-18T07:56:44.063Z",
+  "issue": "26070",
+  "fetchedAt": "2026-06-23T09:22:21.937Z",
   "sourceNote": "仅统计公开网页中的推荐、晒票、已买等文本，不代表官方投注分布。",
   "front": [
     {
+      "n": 1,
+      "count": 6
+    },
+    {
       "n": 4,
-      "count": 4
+      "count": 3
+    },
+    {
+      "n": 19,
+      "count": 3
+    },
+    {
+      "n": 26,
+      "count": 3
+    },
+    {
+      "n": 28,
+      "count": 3
+    },
+    {
+      "n": 31,
+      "count": 3
+    },
+    {
+      "n": 34,
+      "count": 3
     },
     {
       "n": 2,
-      "count": 3
-    },
-    {
-      "n": 13,
-      "count": 3
-    },
-    {
-      "n": 21,
-      "count": 3
-    },
-    {
-      "n": 29,
-      "count": 3
-    },
-    {
-      "n": 30,
-      "count": 3
-    },
-    {
-      "n": 1,
       "count": 2
     },
     {
-      "n": 3,
+      "n": 9,
       "count": 2
     },
     {
-      "n": 5,
-      "count": 2
-    },
-    {
-      "n": 6,
+      "n": 11,
       "count": 2
     },
     {
@@ -54,31 +54,31 @@
   ],
   "back": [
     {
-      "n": 12,
-      "count": 4
+      "n": 2,
+      "count": 3
+    },
+    {
+      "n": 9,
+      "count": 3
     },
     {
       "n": 10,
       "count": 3
     },
     {
-      "n": 4,
-      "count": 2
-    },
-    {
-      "n": 5,
-      "count": 2
+      "n": 11,
+      "count": 3
     },
     {
       "n": 1,
       "count": 1
     },
     {
-      "n": 2,
+      "n": 3,
       "count": 1
     },
     {
-      "n": 3,
+      "n": 5,
       "count": 1
     },
     {
@@ -88,62 +88,62 @@
   ],
   "avoidFront": [
     {
+      "n": 1,
+      "count": 6
+    },
+    {
       "n": 4,
-      "count": 4
-    },
-    {
-      "n": 2,
       "count": 3
     },
     {
-      "n": 13,
+      "n": 19,
       "count": 3
     },
     {
-      "n": 21,
+      "n": 26,
       "count": 3
     },
     {
-      "n": 29,
+      "n": 28,
       "count": 3
     },
     {
-      "n": 30,
+      "n": 31,
       "count": 3
     }
   ],
   "avoidBack": [
     {
-      "n": 12,
-      "count": 4
+      "n": 2,
+      "count": 3
+    },
+    {
+      "n": 9,
+      "count": 3
     },
     {
       "n": 10,
       "count": 3
-    },
-    {
-      "n": 4,
-      "count": 2
     }
   ],
   "sourceCount": 3,
   "mentionCount": 12,
   "sources": [
     {
-      "title": "【中彩网-昭明】大乐透26068期前区综合点评",
-      "url": "https://www.zhcw.com/c/2026-06-18/921985.shtml",
+      "title": "【中彩网-昭明】大乐透26070期前区综合点评",
+      "url": "https://www.zhcw.com/c/2026-06-23/922211.shtml",
       "source": "中彩网大乐透数据分析",
       "mentions": 7
     },
     {
-      "title": "【中彩网-听雨】大乐透26068期后区走势分析",
-      "url": "https://www.zhcw.com/c/2026-06-18/921984.shtml",
+      "title": "【中彩网-听雨】大乐透26070期后区走势分析",
+      "url": "https://www.zhcw.com/c/2026-06-23/922210.shtml",
       "source": "中彩网大乐透数据分析",
       "mentions": 3
     },
     {
-      "title": "【中彩网-嘲风】大乐透26068期定位走势分析",
-      "url": "https://www.zhcw.com/c/2026-06-18/921983.shtml",
+      "title": "【中彩网-嘲风】大乐透26070期定位走势分析",
+      "url": "https://www.zhcw.com/c/2026-06-23/922209.shtml",
       "source": "中彩网大乐透数据分析",
       "mentions": 2
     }
