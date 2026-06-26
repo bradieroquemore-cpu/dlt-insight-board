@@ -1,15 +1,15 @@
 {
   "source": "中国体彩网公开开奖接口",
   "sourceUrl": "https://www.sporttery.cn/zst/dlt/",
-  "fetchedAt": "2026-06-23T09:22:12.423Z",
-  "total": 2887,
+  "fetchedAt": "2026-06-26T03:25:28.365Z",
+  "total": 2888,
   "latestPoolDraw": {
-    "lotteryDrawNum": "26009",
-    "lotteryDrawResult": "05 12 13 14 33 05 08",
-    "lotteryDrawTime": "2026-01-21",
+    "lotteryDrawNum": "26010",
+    "lotteryDrawResult": "02 03 13 18 26 02 09",
+    "lotteryDrawTime": "2026-01-24",
     "lotteryGameName": "超级大乐透",
     "lotteryGameNum": "85",
-    "poolBalanceAfterdraw": "734,360,129.02",
+    "poolBalanceAfterdraw": "751,872,266.32",
     "prizeLevelList": [
       {
         "awardType": 0,
@@ -17,10 +17,10 @@
         "lotteryCondition": "",
         "prizeLevel": "一等奖",
         "sort": 101,
-        "stakeAmount": "7,330,817",
-        "stakeAmountFormat": "7330817",
-        "stakeCount": "5",
-        "totalPrizeamount": "36,654,085"
+        "stakeAmount": "7,802,471",
+        "stakeAmountFormat": "7802471",
+        "stakeCount": "4",
+        "totalPrizeamount": "31,209,884"
       },
       {
         "awardType": 0,
@@ -28,10 +28,10 @@
         "lotteryCondition": "",
         "prizeLevel": "一等奖(追加)",
         "sort": 201,
-        "stakeAmount": "5,864,653",
-        "stakeAmountFormat": "5864653",
-        "stakeCount": "1",
-        "totalPrizeamount": "5,864,653"
+        "stakeAmount": "6,241,976",
+        "stakeAmountFormat": "6241976",
+        "stakeCount": "2",
+        "totalPrizeamount": "12,483,952"
       },
       {
         "awardType": 0,
@@ -39,10 +39,10 @@
         "lotteryCondition": "",
         "prizeLevel": "二等奖",
         "sort": 301,
-        "stakeAmount": "81,886",
-        "stakeAmountFormat": "81886",
-        "stakeCount": "144",
-        "totalPrizeamount": "11,791,584"
+        "stakeAmount": "80,971",
+        "stakeAmountFormat": "80971",
+        "stakeCount": "182",
+        "totalPrizeamount": "14,736,722"
       },
       {
         "awardType": 0,
@@ -50,10 +50,10 @@
         "lotteryCondition": "",
         "prizeLevel": "二等奖(追加)",
         "sort": 401,
-        "stakeAmount": "65,508",
-        "stakeAmountFormat": "65508",
-        "stakeCount": "47",
-        "totalPrizeamount": "3,078,876"
+        "stakeAmount": "64,776",
+        "stakeAmountFormat": "64776",
+        "stakeCount": "39",
+        "totalPrizeamount": "2,526,264"
       },
       {
         "awardType": 0,
@@ -63,8 +63,8 @@
         "sort": 501,
         "stakeAmount": "10,000",
         "stakeAmountFormat": "10000",
-        "stakeCount": "517",
-        "totalPrizeamount": "5,170,000"
+        "stakeCount": "278",
+        "totalPrizeamount": "2,780,000"
       },
       {
         "awardType": 0,
@@ -74,8 +74,8 @@
         "sort": 601,
         "stakeAmount": "3,000",
         "stakeAmountFormat": "3000",
-        "stakeCount": "1,045",
-        "totalPrizeamount": "3,135,000"
+        "stakeCount": "1,107",
+        "totalPrizeamount": "3,321,000"
       },
       {
         "awardType": 0,
@@ -85,8 +85,8 @@
         "sort": 701,
         "stakeAmount": "300",
         "stakeAmountFormat": "300",
-        "stakeCount": "17,701",
-        "totalPrizeamount": "5,310,300"
+        "stakeCount": "21,240",
+        "totalPrizeamount": "6,372,000"
       },
       {
         "awardType": 0,
@@ -96,8 +96,8 @@
         "sort": 801,
         "stakeAmount": "200",
         "stakeAmountFormat": "200",
-        "stakeCount": "35,687",
-        "totalPrizeamount": "7,137,400"
+        "stakeCount": "37,053",
+        "totalPrizeamount": "7,410,600"
       },
       {
         "awardType": 0,
@@ -107,8 +107,8 @@
         "sort": 901,
         "stakeAmount": "100",
         "stakeAmountFormat": "100",
-        "stakeCount": "36,460",
-        "totalPrizeamount": "3,646,000"
+        "stakeCount": "44,503",
+        "totalPrizeamount": "4,450,300"
       },
       {
         "awardType": 0,
@@ -118,8 +118,8 @@
         "sort": 1001,
         "stakeAmount": "15",
         "stakeAmountFormat": "15",
-        "stakeCount": "877,182",
-        "totalPrizeamount": "13,157,730"
+        "stakeCount": "953,705",
+        "totalPrizeamount": "14,305,575"
       },
       {
         "awardType": 0,
@@ -129,12 +129,157 @@
         "sort": 1101,
         "stakeAmount": "5",
         "stakeAmountFormat": "5",
-        "stakeCount": "8,603,868",
-        "totalPrizeamount": "43,019,340"
+        "stakeCount": "9,524,500",
+        "totalPrizeamount": "47,622,500"
       }
     ]
   },
   "list": [
+    {
+      "drawFlowFund": "56928003.83",
+      "drawFlowFundRj": "",
+      "drawPdfUrl": "https://pdf.sporttery.cn/33800/26070/26070.pdf",
+      "estimateDrawTime": "",
+      "isGetKjpdf": 1,
+      "isGetXlpdf": 2,
+      "lotteryDrawNum": "26070",
+      "lotteryDrawResult": "04 05 15 21 32 02 11",
+      "lotteryDrawStatus": 20,
+      "lotteryDrawStatusNo": "",
+      "lotteryDrawTime": "2026-06-24",
+      "lotteryEquipmentCount": 1,
+      "lotteryGameName": "超级大乐透",
+      "lotteryGameNum": "85",
+      "lotteryGamePronum": 0,
+      "lotteryNotice": 1,
+      "lotteryNoticeShowFlag": 1,
+      "lotteryPaidBeginTime": "2026-06-24 23:30:01",
+      "lotteryPaidEndTime": "2026-08-24 23:59:59",
+      "lotteryPromotionFlag": 0,
+      "lotteryPromotionFlagRj": 0,
+      "lotterySaleBeginTime": "2026-06-22 21:10:00",
+      "lotterySaleEndTimeUnix": 0,
+      "lotterySaleEndtime": "2026-06-24 21:00:00",
+      "lotterySuspendedFlag": 0,
+      "lotteryUnsortDrawresult": "15 04 05 32 21 11 02",
+      "matchList": [],
+      "overRedLineInfo": "",
+      "pdfType": 1,
+      "poolBalance": "757,966,457.83",
+      "poolBalanceAfterdraw": "814,894,461.66",
+      "poolBalanceAfterdrawRj": "",
+      "prizeLevelList": [
+        {
+          "awardType": 0,
+          "group": "101",
+          "lotteryCondition": "",
+          "prizeLevel": "一等奖",
+          "sort": 101,
+          "stakeAmount": "10,000,000",
+          "stakeAmountFormat": "10000000",
+          "stakeCount": "1",
+          "totalPrizeamount": "10,000,000"
+        },
+        {
+          "awardType": 0,
+          "group": "201",
+          "lotteryCondition": "",
+          "prizeLevel": "一等奖(追加)",
+          "sort": 201,
+          "stakeAmount": "---",
+          "stakeAmountFormat": "-1",
+          "stakeCount": "0",
+          "totalPrizeamount": "0"
+        },
+        {
+          "awardType": 0,
+          "group": "301",
+          "lotteryCondition": "",
+          "prizeLevel": "二等奖",
+          "sort": 301,
+          "stakeAmount": "142,147",
+          "stakeAmountFormat": "142147",
+          "stakeCount": "112",
+          "totalPrizeamount": "15,920,464"
+        },
+        {
+          "awardType": 0,
+          "group": "401",
+          "lotteryCondition": "",
+          "prizeLevel": "二等奖(追加)",
+          "sort": 401,
+          "stakeAmount": "113,717",
+          "stakeAmountFormat": "113717",
+          "stakeCount": "26",
+          "totalPrizeamount": "2,956,642"
+        },
+        {
+          "awardType": 0,
+          "group": "501",
+          "lotteryCondition": "",
+          "prizeLevel": "三等奖",
+          "sort": 501,
+          "stakeAmount": "5,000",
+          "stakeAmountFormat": "5000",
+          "stakeCount": "956",
+          "totalPrizeamount": "4,780,000"
+        },
+        {
+          "awardType": 0,
+          "group": "601",
+          "lotteryCondition": "",
+          "prizeLevel": "四等奖",
+          "sort": 601,
+          "stakeAmount": "300",
+          "stakeAmountFormat": "300",
+          "stakeCount": "15,321",
+          "totalPrizeamount": "4,596,300"
+        },
+        {
+          "awardType": 0,
+          "group": "701",
+          "lotteryCondition": "",
+          "prizeLevel": "五等奖",
+          "sort": 701,
+          "stakeAmount": "150",
+          "stakeAmountFormat": "150",
+          "stakeCount": "61,695",
+          "totalPrizeamount": "9,254,250"
+        },
+        {
+          "awardType": 0,
+          "group": "801",
+          "lotteryCondition": "",
+          "prizeLevel": "六等奖",
+          "sort": 801,
+          "stakeAmount": "15",
+          "stakeAmountFormat": "15",
+          "stakeCount": "701,558",
+          "totalPrizeamount": "10,523,370"
+        },
+        {
+          "awardType": 0,
+          "group": "901",
+          "lotteryCondition": "",
+          "prizeLevel": "七等奖",
+          "sort": 901,
+          "stakeAmount": "5",
+          "stakeAmountFormat": "5",
+          "stakeCount": "7,655,003",
+          "totalPrizeamount": "38,275,015"
+        }
+      ],
+      "prizeLevelListRj": [],
+      "ruleType": 0,
+      "surplusAmount": "",
+      "surplusAmountRj": "",
+      "termList": [],
+      "termResultList": [],
+      "totalSaleAmount": "312,722,588",
+      "totalSaleAmountRj": "",
+      "verify": 1,
+      "vtoolsConfig": {}
+    },
     {
       "drawFlowFund": "0",
       "drawFlowFundRj": "",
@@ -14700,174 +14845,7 @@
       "totalSaleAmountRj": "",
       "verify": 1,
       "vtoolsConfig": {}
-    },
-    {
-      "drawFlowFund": "28565208.9",
-      "drawFlowFundRj": "",
-      "drawPdfUrl": "https://pdf.sporttery.cn/33800/25130/25130.pdf",
-      "estimateDrawTime": "",
-      "isGetKjpdf": 1,
-      "isGetXlpdf": 2,
-      "lotteryDrawNum": "25130",
-      "lotteryDrawResult": "01 13 16 27 29 02 11",
-      "lotteryDrawStatus": 20,
-      "lotteryDrawStatusNo": "",
-      "lotteryDrawTime": "2025-11-15",
-      "lotteryEquipmentCount": 3,
-      "lotteryGameName": "超级大乐透",
-      "lotteryGameNum": "85",
-      "lotteryGamePronum": 0,
-      "lotteryNotice": 1,
-      "lotteryNoticeShowFlag": 1,
-      "lotteryPaidBeginTime": "2025-11-15 23:30:01",
-      "lotteryPaidEndTime": "2026-01-14 23:59:59",
-      "lotteryPromotionFlag": 0,
-      "lotteryPromotionFlagRj": 0,
-      "lotterySaleBeginTime": "2025-11-12 21:10:00",
-      "lotterySaleEndTimeUnix": 0,
-      "lotterySaleEndtime": "2025-11-15 21:00:00",
-      "lotterySuspendedFlag": 0,
-      "lotteryUnsortDrawresult": "13 01 27 29 16 02 11",
-      "matchList": [],
-      "overRedLineInfo": "",
-      "pdfType": 1,
-      "poolBalance": "826,944,600.37",
-      "poolBalanceAfterdraw": "855,509,809.27",
-      "poolBalanceAfterdrawRj": "",
-      "prizeLevelList": [
-        {
-          "awardType": 0,
-          "group": "101",
-          "lotteryCondition": "",
-          "prizeLevel": "一等奖",
-          "sort": 101,
-          "stakeAmount": "10,000,000",
-          "stakeAmountFormat": "10000000",
-          "stakeCount": "5",
-          "totalPrizeamount": "50,000,000"
-        },
-        {
-          "awardType": 0,
-          "group": "201",
-          "lotteryCondition": "",
-          "prizeLevel": "一等奖(追加)",
-          "sort": 201,
-          "stakeAmount": "---",
-          "stakeAmountFormat": "-1",
-          "stakeCount": "0",
-          "totalPrizeamount": "0"
-        },
-        {
-          "awardType": 0,
-          "group": "301",
-          "lotteryCondition": "",
-          "prizeLevel": "二等奖",
-          "sort": 301,
-          "stakeAmount": "202,925",
-          "stakeAmountFormat": "202925",
-          "stakeCount": "98",
-          "totalPrizeamount": "19,886,650"
-        },
-        {
-          "awardType": 0,
-          "group": "401",
-          "lotteryCondition": "",
-          "prizeLevel": "二等奖(追加)",
-          "sort": 401,
-          "stakeAmount": "162,340",
-          "stakeAmountFormat": "162340",
-          "stakeCount": "14",
-          "totalPrizeamount": "2,272,760"
-        },
-        {
-          "awardType": 0,
-          "group": "501",
-          "lotteryCondition": "",
-          "prizeLevel": "三等奖",
-          "sort": 501,
-          "stakeAmount": "10,000",
-          "stakeAmountFormat": "10000",
-          "stakeCount": "273",
-          "totalPrizeamount": "2,730,000"
-        },
-        {
-          "awardType": 0,
-          "group": "601",
-          "lotteryCondition": "",
-          "prizeLevel": "四等奖",
-          "sort": 601,
-          "stakeAmount": "3,000",
-          "stakeAmountFormat": "3000",
-          "stakeCount": "742",
-          "totalPrizeamount": "2,226,000"
-        },
-        {
-          "awardType": 0,
-          "group": "701",
-          "lotteryCondition": "",
-          "prizeLevel": "五等奖",
-          "sort": 701,
-          "stakeAmount": "300",
-          "stakeAmountFormat": "300",
-          "stakeCount": "16,209",
-          "totalPrizeamount": "4,862,700"
-        },
-        {
-          "awardType": 0,
-          "group": "801",
-          "lotteryCondition": "",
-          "prizeLevel": "六等奖",
-          "sort": 801,
-          "stakeAmount": "200",
-          "stakeAmountFormat": "200",
-          "stakeCount": "21,290",
-          "totalPrizeamount": "4,258,000"
-        },
-        {
-          "awardType": 0,
-          "group": "901",
-          "lotteryCondition": "",
-          "prizeLevel": "七等奖",
-          "sort": 901,
-          "stakeAmount": "100",
-          "stakeAmountFormat": "100",
-          "stakeCount": "47,283",
-          "totalPrizeamount": "4,728,300"
-        },
-        {
-          "awardType": 0,
-          "group": "1001",
-          "lotteryCondition": "",
-          "prizeLevel": "八等奖",
-          "sort": 1001,
-          "stakeAmount": "15",
-          "stakeAmountFormat": "15",
-          "stakeCount": "726,539",
-          "totalPrizeamount": "10,898,085"
-        },
-        {
-          "awardType": 0,
-          "group": "1101",
-          "lotteryCondition": "",
-          "prizeLevel": "九等奖",
-          "sort": 1101,
-          "stakeAmount": "5",
-          "stakeAmountFormat": "5",
-          "stakeCount": "8,016,382",
-          "totalPrizeamount": "40,081,910"
-        }
-      ],
-      "prizeLevelListRj": [],
-      "ruleType": 0,
-      "surplusAmount": "",
-      "surplusAmountRj": "",
-      "termList": [],
-      "termResultList": [],
-      "totalSaleAmount": "347,978,820",
-      "totalSaleAmountRj": "",
-      "verify": 1,
-      "vtoolsConfig": {}
     }
   ],
-  "staticGeneratedAt": "2026-06-23T09:22:12.423Z"
+  "staticGeneratedAt": "2026-06-26T03:25:28.365Z"
 }

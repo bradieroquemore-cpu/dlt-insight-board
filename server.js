@@ -11,6 +11,7 @@ const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.PORT || 5173);
 const API =
   "https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry";
+const FALLBACK_HISTORY_API = "https://datachart.500.com/dlt/history/inc/history.php";
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 const PUBLIC_SOURCE_INDEXES = [
@@ -101,27 +102,72 @@ async function getHistory(limit) {
     return cached.payload;
   }
 
-  const all = [];
-  let meta = null;
-  for (let page = 1; page <= pagesNeeded; page += 1) {
-    const json = await fetchPage(page, pageSize);
-    if (!json?.success || !json?.value?.list) {
-      throw new Error(json?.errorMessage || "体彩接口没有返回开奖列表");
+  try {
+    const all = [];
+    let meta = null;
+    for (let page = 1; page <= pagesNeeded; page += 1) {
+      const json = await fetchPage(page, pageSize);
+      if (!json?.success || !json?.value?.list) {
+        throw new Error(json?.errorMessage || "体彩接口没有返回开奖列表");
+      }
+      meta = json.value;
+      all.push(...json.value.list);
     }
-    meta = json.value;
-    all.push(...json.value.list);
+
+    const payload = {
+      source: "中国体彩网公开开奖接口",
+      sourceUrl: "https://www.sporttery.cn/zst/dlt/",
+      fetchedAt: new Date().toISOString(),
+      total: meta?.total || all.length,
+      latestPoolDraw: meta?.lastPoolDraw || all[0] || null,
+      list: all.slice(0, limit)
+    };
+    cache.set(key, { time: Date.now(), payload });
+    return payload;
+  } catch (error) {
+    const payload = await getHistoryFromFallback(limit, error);
+    cache.set(key, { time: Date.now(), payload });
+    return payload;
+  }
+}
+
+async function getHistoryFromFallback(limit, officialError) {
+  const url = new URL(FALLBACK_HISTORY_API);
+  url.search = new URLSearchParams({ limit: String(limit) });
+  const html = await fetchText(url.href);
+  const rows = parse500HistoryRows(html).slice(0, limit);
+  if (!rows.length) {
+    throw new Error(`体彩接口失败，备用历史表也没有解析到开奖数据：${officialError.message}`);
   }
 
-  const payload = {
-    source: "中国体彩网公开开奖接口",
-    sourceUrl: "https://www.sporttery.cn/zst/dlt/",
+  return {
+    source: "500彩票网公开历史开奖表（中国体彩网接口暂不可用）",
+    sourceUrl: url.href,
     fetchedAt: new Date().toISOString(),
-    total: meta?.total || all.length,
-    latestPoolDraw: meta?.lastPoolDraw || all[0] || null,
-    list: all.slice(0, limit)
+    total: rows.length,
+    latestPoolDraw: rows[0],
+    officialFetchError: officialError.message,
+    list: rows
   };
-  cache.set(key, { time: Date.now(), payload });
-  return payload;
+}
+
+function parse500HistoryRows(html) {
+  const rows = [];
+  const rowRegex = /<tr class="t_tr1">([\s\S]*?)<\/tr>/gi;
+  for (const match of html.matchAll(rowRegex)) {
+    const cells = [...match[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((cell) => stripTags(cell[1]).trim());
+    const issueIndex = cells.findIndex((cell) => /^\d{5}$/.test(cell));
+    if (issueIndex === -1 || cells.length < issueIndex + 15) continue;
+    const nums = cells.slice(issueIndex + 1, issueIndex + 8);
+    if (!nums.every((num) => /^\d{2}$/.test(num))) continue;
+    rows.push({
+      lotteryDrawNum: cells[issueIndex],
+      lotteryDrawTime: cells[issueIndex + 14] || "",
+      lotteryDrawResult: nums.join(" "),
+      poolBalanceAfterdraw: cells[issueIndex + 8] || "--"
+    });
+  }
+  return rows;
 }
 
 function decodeEntities(text) {
