@@ -13,6 +13,11 @@ const PROBABILITY_METHODS = [
   { id: "ema", label: "指数近期", weight: 0.4 },
   { id: "miss", label: "遗漏修正", weight: 0.15 }
 ];
+const MENTOR_WEIGHTS = [
+  { id: "track", label: "轨迹传导", weight: 0.32 },
+  { id: "structure", label: "结构热冷", weight: 0.34 },
+  { id: "indicator", label: "指标约束", weight: 0.34 }
+];
 const FRONT_BANDS = [
   { name: "01-07", min: 1, max: 7 },
   { name: "08-14", min: 8, max: 14 },
@@ -24,6 +29,11 @@ const BACK_BANDS = [
   { name: "01-04", min: 1, max: 4 },
   { name: "05-08", min: 5, max: 8 },
   { name: "09-12", min: 9, max: 12 }
+];
+const FRONT_ZONES = [
+  { name: "一区", min: 1, max: 12 },
+  { name: "二区", min: 13, max: 24 },
+  { name: "三区", min: 25, max: 35 }
 ];
 
 const state = {
@@ -45,6 +55,11 @@ const el = {
   refreshBtn: document.querySelector("#refreshBtn"),
   generateBtn: document.querySelector("#generateBtn"),
   autoUpdateStatus: document.querySelector("#autoUpdateStatus"),
+  mentorIssue: document.querySelector("#mentorIssue"),
+  mentorMethods: document.querySelector("#mentorMethods"),
+  mentorShape: document.querySelector("#mentorShape"),
+  mentorPool: document.querySelector("#mentorPool"),
+  mentorCombos: document.querySelector("#mentorCombos"),
   latestIssue: document.querySelector("#latestIssue"),
   latestDate: document.querySelector("#latestDate"),
   latestBalls: document.querySelector("#latestBalls"),
@@ -391,6 +406,323 @@ function renderProbabilityBoard() {
   renderProbabilityList(el.backProbability, state.analysis.backProbability, "back", 2);
 }
 
+function addScore(map, n, value, max) {
+  if (n < 1 || n > max) return;
+  map.set(n, (map.get(n) || 0) + value);
+}
+
+function normalizedItems(map, max) {
+  const values = Array.from({ length: max }, (_, index) => map.get(index + 1) || 0);
+  const min = Math.min(...values);
+  const peak = Math.max(...values) - min || 1;
+  return values.map((value, index) => ({
+    n: index + 1,
+    score: (value - min) / peak
+  }));
+}
+
+function itemMap(items, field = "score") {
+  return new Map(items.map((item) => [item.n, item[field]]));
+}
+
+function zoneForFront(n) {
+  return FRONT_ZONES.findIndex((zone) => n >= zone.min && n <= zone.max);
+}
+
+function zoneLabelFromCounts(counts) {
+  return counts.map((count, index) => `${FRONT_ZONES[index].name}${count}`).join(" ");
+}
+
+function zoneCountsForFront(nums) {
+  const counts = [0, 0, 0];
+  nums.forEach((n) => {
+    const zone = zoneForFront(n);
+    if (zone >= 0) counts[zone] += 1;
+  });
+  return counts;
+}
+
+function targetZoneCounts(draws) {
+  const recent = draws.slice(0, Math.min(10, draws.length));
+  const counts = [0, 0, 0];
+  recent.forEach((draw) => draw.front.forEach((n) => {
+    const zone = zoneForFront(n);
+    if (zone >= 0) counts[zone] += 1;
+  }));
+  const expected = FRONT_ZONES.map((zone) => ((zone.max - zone.min + 1) / FRONT_MAX) * recent.length * 5);
+  const desire = expected.map((value, index) => clamp(value - counts[index], -5, 5) + 6);
+  const target = [1, 1, 1];
+  while (target.reduce((a, b) => a + b, 0) < 5) {
+    const index = desire
+      .map((value, zone) => ({ zone, value: value / (target[zone] + 1) }))
+      .sort((a, b) => b.value - a.value)[0].zone;
+    target[index] += 1;
+  }
+  return target;
+}
+
+function recentStats(draws) {
+  const recent = draws.slice(0, Math.min(10, draws.length));
+  const sums = recent.map((draw) => draw.front.reduce((sum, n) => sum + n, 0));
+  const avgSum = Math.round(sums.reduce((sum, n) => sum + n, 0) / Math.max(sums.length, 1));
+  const oddRate = recent.flatMap((draw) => draw.front).filter((n) => n % 2).length / Math.max(recent.length * 5, 1);
+  const bigRate = recent.flatMap((draw) => draw.front).filter((n) => n >= 18).length / Math.max(recent.length * 5, 1);
+  const spans = recent.map((draw) => Math.abs(draw.back[1] - draw.back[0])).sort((a, b) => a - b);
+  return {
+    avgSum,
+    sumRange: [Math.max(60, avgSum - 16), Math.min(145, avgSum + 16)],
+    targetOdd: oddRate >= 0.52 ? 3 : 2,
+    targetBig: bigRate >= 0.52 ? 3 : 2,
+    targetBackSpan: spans[Math.floor(spans.length / 2)] || 4
+  };
+}
+
+function buildTrackMentor(draws) {
+  const frontMap = new Map();
+  const backMap = new Map();
+  const recent = draws.slice(0, Math.min(8, draws.length));
+  recent.forEach((draw, index) => {
+    const weight = Math.pow(0.72, index);
+    draw.front.forEach((n) => {
+      addScore(frontMap, n, 1.35 * weight, FRONT_MAX);
+      addScore(frontMap, n - 1, 0.72 * weight, FRONT_MAX);
+      addScore(frontMap, n + 1, 0.72 * weight, FRONT_MAX);
+      addScore(frontMap, n - 2, 0.38 * weight, FRONT_MAX);
+      addScore(frontMap, n + 2, 0.38 * weight, FRONT_MAX);
+    });
+    draw.back.forEach((n) => {
+      addScore(backMap, n, 1.25 * weight, BACK_MAX);
+      addScore(backMap, n - 1, 0.64 * weight, BACK_MAX);
+      addScore(backMap, n + 1, 0.64 * weight, BACK_MAX);
+    });
+  });
+
+  const last = draws[0];
+  const previous = draws.slice(1, 5);
+  last.front.forEach((n) => previous.forEach((draw) => {
+    draw.front.forEach((candidate) => {
+      if (Math.abs(candidate - n) <= 3) addScore(frontMap, candidate, 0.55, FRONT_MAX);
+    });
+  }));
+  last.back.forEach((n) => previous.forEach((draw) => {
+    draw.back.forEach((candidate) => {
+      if (Math.abs(candidate - n) <= 2) addScore(backMap, candidate, 0.45, BACK_MAX);
+    });
+  }));
+
+  return {
+    id: "track",
+    title: "轨迹传导",
+    from: "截图 1：多张连线图、邻期节点、隔期重号",
+    brief: "上期与近几期号码向左右邻号、隔期重合和同区间传导，适合抓“刚走出来的线”。",
+    front: normalizedItems(frontMap, FRONT_MAX),
+    back: normalizedItems(backMap, BACK_MAX)
+  };
+}
+
+function buildStructureMentor(draws, analysis) {
+  const frontMap = new Map();
+  const backMap = new Map();
+  const targetZones = targetZoneCounts(draws);
+  const hotFront = new Set(analysis.hotFront.slice(0, 12).map((item) => item.n));
+  const coldFront = new Set(analysis.killFront.slice(0, 9).map((item) => item.n));
+  const hotBack = new Set(analysis.hotBack.slice(0, 5).map((item) => item.n));
+  const coldBack = new Set(analysis.killBack.slice(0, 4).map((item) => item.n));
+  const probabilityFront = itemMap(analysis.frontProbability, "probability");
+  const probabilityBack = itemMap(analysis.backProbability, "probability");
+
+  for (let n = 1; n <= FRONT_MAX; n += 1) {
+    const zone = zoneForFront(n);
+    const zoneBoost = targetZones[zone] / 5;
+    addScore(frontMap, n, zoneBoost * 1.2 + (probabilityFront.get(n) || 0) * 8, FRONT_MAX);
+    if (hotFront.has(n)) addScore(frontMap, n, 0.7, FRONT_MAX);
+    if (coldFront.has(n)) addScore(frontMap, n, 0.34, FRONT_MAX);
+  }
+  for (let n = 1; n <= BACK_MAX; n += 1) {
+    addScore(backMap, n, (probabilityBack.get(n) || 0) * 8, BACK_MAX);
+    if (hotBack.has(n)) addScore(backMap, n, 0.72, BACK_MAX);
+    if (coldBack.has(n)) addScore(backMap, n, 0.28, BACK_MAX);
+  }
+
+  return {
+    id: "structure",
+    title: "结构热冷",
+    from: "截图 2：三区、热码/冷码、和值跨度、热冷组合",
+    brief: `先定三区骨架 ${zoneLabelFromCounts(targetZones)}，再用热号做主力、冷号做补位。`,
+    front: normalizedItems(frontMap, FRONT_MAX),
+    back: normalizedItems(backMap, BACK_MAX),
+    targetZones
+  };
+}
+
+function buildIndicatorMentor(draws, analysis, stats) {
+  const frontMap = new Map();
+  const backMap = new Map();
+  const probabilityFront = itemMap(analysis.frontProbability, "probability");
+  const probabilityBack = itemMap(analysis.backProbability, "probability");
+  const targetZones = targetZoneCounts(draws);
+
+  for (let n = 1; n <= FRONT_MAX; n += 1) {
+    const zone = zoneForFront(n);
+    const zoneSignal = targetZones[zone] / Math.max(...targetZones);
+    const bigSignal = n >= 18 ? stats.targetBig / 5 : (5 - stats.targetBig) / 5;
+    const oddSignal = n % 2 ? stats.targetOdd / 5 : (5 - stats.targetOdd) / 5;
+    const sumSignal = n >= stats.sumRange[0] / 5 - 6 && n <= stats.sumRange[1] / 5 + 8 ? 0.55 : 0.22;
+    addScore(frontMap, n, zoneSignal * 0.95 + bigSignal * 0.45 + oddSignal * 0.32 + sumSignal + (probabilityFront.get(n) || 0) * 5, FRONT_MAX);
+  }
+
+  for (let n = 1; n <= BACK_MAX; n += 1) {
+    const spanFit = draws[0].back.some((last) => Math.abs(last - n) <= Math.max(1, stats.targetBackSpan)) ? 0.38 : 0.18;
+    addScore(backMap, n, spanFit + (probabilityBack.get(n) || 0) * 6, BACK_MAX);
+  }
+
+  return {
+    id: "indicator",
+    title: "指标约束",
+    from: "截图 3：三区比、大小比、和值区间、后区跨度",
+    brief: `约束为 ${zoneLabelFromCounts(targetZones)}，大小 ${stats.targetBig}:${5 - stats.targetBig}，奇偶 ${stats.targetOdd}:${5 - stats.targetOdd}，和值 ${stats.sumRange[0]}-${stats.sumRange[1]}。`,
+    front: normalizedItems(frontMap, FRONT_MAX),
+    back: normalizedItems(backMap, BACK_MAX),
+    targetZones
+  };
+}
+
+function combineMentors(mentors, max, key) {
+  const maps = Object.fromEntries(mentors.map((mentor) => [mentor.id, itemMap(mentor[key])]));
+  return Array.from({ length: max }, (_, index) => {
+    const n = index + 1;
+    const score = MENTOR_WEIGHTS.reduce((sum, method) => sum + method.weight * (maps[method.id].get(n) || 0), 0);
+    return { n, score };
+  }).sort((a, b) => b.score - a.score || a.n - b.n);
+}
+
+function comboShapePenalty(front, stats, targetZones) {
+  const zoneCounts = zoneCountsForFront(front);
+  const zonePenalty = zoneCounts.reduce((sum, count, index) => sum + Math.abs(count - targetZones[index]) * 10, 0);
+  const big = front.filter((n) => n >= 18).length;
+  const odd = front.filter((n) => n % 2).length;
+  const sum = front.reduce((total, n) => total + n, 0);
+  const sumPenalty = sum < stats.sumRange[0] ? (stats.sumRange[0] - sum) * 0.7 : sum > stats.sumRange[1] ? (sum - stats.sumRange[1]) * 0.7 : 0;
+  return zonePenalty + Math.abs(big - stats.targetBig) * 7 + Math.abs(odd - stats.targetOdd) * 5 + sumPenalty;
+}
+
+function combinations(source, count, start = 0, prefix = [], out = []) {
+  if (prefix.length === count) {
+    out.push(prefix);
+    return out;
+  }
+  for (let index = start; index <= source.length - (count - prefix.length); index += 1) {
+    combinations(source, count, index + 1, [...prefix, source[index]], out);
+  }
+  return out;
+}
+
+function bestFrontCombos(pool, stats, targetZones) {
+  const top = pool.slice(0, 14);
+  const byNumber = new Map(pool.map((item) => [item.n, item.score]));
+  const ranked = combinations(top.map((item) => item.n), 5)
+    .map((front) => {
+      const sorted = front.sort((a, b) => a - b);
+      return {
+        front: sorted,
+        score: sorted.reduce((sum, n) => sum + (byNumber.get(n) || 0), 0) * 100 - comboShapePenalty(sorted, stats, targetZones)
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+  const first = ranked[0];
+  const second = ranked.find((combo) => combo.front.filter((n) => first.front.includes(n)).length <= 2) || ranked[1] || first;
+  return [first, second];
+}
+
+function bestBackCombos(pool, stats) {
+  const top = pool.slice(0, 7);
+  const byNumber = new Map(pool.map((item) => [item.n, item.score]));
+  const ranked = combinations(top.map((item) => item.n), 2)
+    .map((back) => {
+      const sorted = back.sort((a, b) => a - b);
+      const span = Math.abs(sorted[1] - sorted[0]);
+      return {
+        back: sorted,
+        score: sorted.reduce((sum, n) => sum + (byNumber.get(n) || 0), 0) * 100 - Math.abs(span - stats.targetBackSpan) * 3
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+  const first = ranked[0];
+  const second = ranked.find((combo) => combo.back.filter((n) => first.back.includes(n)).length <= 1) || ranked[1] || first;
+  return [first, second];
+}
+
+function buildMentorFusion(draws, analysis) {
+  const stats = recentStats(draws);
+  const targetZones = targetZoneCounts(draws);
+  const mentors = [
+    buildTrackMentor(draws),
+    buildStructureMentor(draws, analysis),
+    buildIndicatorMentor(draws, analysis, stats)
+  ];
+  const frontPool = combineMentors(mentors, FRONT_MAX, "front");
+  const backPool = combineMentors(mentors, BACK_MAX, "back");
+  const frontCombos = bestFrontCombos(frontPool, stats, targetZones);
+  const backCombos = bestBackCombos(backPool, stats);
+  const combos = frontCombos.map((combo, index) => {
+    const front = combo.front;
+    const back = backCombos[index]?.back || backCombos[0].back;
+    const odd = front.filter((n) => n % 2).length;
+    const big = front.filter((n) => n >= 18).length;
+    const sum = front.reduce((total, n) => total + n, 0);
+    return {
+      front,
+      back,
+      note: `区间 ${zoneLabelFromCounts(zoneCountsForFront(front))} / 大小 ${big}:${5 - big} / 奇偶 ${odd}:${5 - odd} / 和值 ${sum}`
+    };
+  });
+
+  return { stats, targetZones, mentors, frontPool, backPool, combos };
+}
+
+function renderMentorFusion() {
+  if (!state.analysis || !state.draws.length) return;
+  const fusion = buildMentorFusion(state.draws, state.analysis);
+  const issue = nextIssue(state.draws[0].issue);
+  el.mentorIssue.textContent = `第 ${issue} 期`;
+  el.mentorShape.textContent = `${zoneLabelFromCounts(fusion.targetZones)} / 和值 ${fusion.stats.sumRange[0]}-${fusion.stats.sumRange[1]}`;
+  el.mentorMethods.innerHTML = fusion.mentors
+    .map((mentor) => {
+      const method = MENTOR_WEIGHTS.find((item) => item.id === mentor.id);
+      const front = [...mentor.front].sort((a, b) => b.score - a.score).slice(0, 6);
+      const back = [...mentor.back].sort((a, b) => b.score - a.score).slice(0, 3);
+      return `<article class="mentor-card">
+        <div>
+          <span class="mentor-weight">${Math.round(method.weight * 100)}%</span>
+          <h3>${mentor.title}</h3>
+        </div>
+        <p>${mentor.from}</p>
+        <strong>${mentor.brief}</strong>
+        <div class="balls">${front.map((item) => ball(item.n, "front")).join("")}${back.map((item) => ball(item.n, "back")).join("")}</div>
+      </article>`;
+    })
+    .join("");
+  el.mentorPool.innerHTML = `
+    <div>
+      <span class="label">前区融合 Top 12</span>
+      <div class="balls">${fusion.frontPool.slice(0, 12).map((item) => ball(item.n, "front")).join("")}</div>
+    </div>
+    <div>
+      <span class="label">后区融合 Top 5</span>
+      <div class="balls">${fusion.backPool.slice(0, 5).map((item) => ball(item.n, "back")).join("")}</div>
+    </div>
+  `;
+  el.mentorCombos.innerHTML = fusion.combos
+    .map((combo, index) => `<div class="combo mentor-combo">
+      <span class="combo-index">${index + 1}</span>
+      <div>
+        <div class="balls">${combo.front.map((n) => ball(n, "front")).join("")}${combo.back.map((n) => ball(n, "back")).join("")}</div>
+        <span class="combo-note">${combo.note}</span>
+      </div>
+    </div>`)
+    .join("");
+}
+
 function pickWeighted(pool, count, avoid = []) {
   const avoidSet = new Set(avoid);
   const candidates = pool.filter((item) => !avoidSet.has(item.n));
@@ -517,6 +849,7 @@ function render() {
   renderHeatmap(el.backHeatmap, state.analysis.back, "back");
   el.frontSummary.textContent = `热号 ${state.analysis.hotFront.slice(0, 3).map((x) => pad(x.n)).join(" ")}`;
   el.backSummary.textContent = `热号 ${state.analysis.hotBack.slice(0, 2).map((x) => pad(x.n)).join(" ")}`;
+  renderMentorFusion();
   renderRank();
   renderProbabilityBoard();
   el.frontKill.innerHTML = state.analysis.killFront.map((item) => ball(item.n, "front")).join("");

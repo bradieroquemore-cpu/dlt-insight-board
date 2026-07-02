@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>大乐透趋势分析台</title>
-    <link rel="stylesheet" href="./styles.css?v=20260623-probability" />
+    <link rel="stylesheet" href="./styles.css?v=20260702-mentor-fusion-2" />
   </head>
   <body>
     <main class="shell">
@@ -46,6 +46,34 @@
         <div class="auto-chip" aria-live="polite">
           <span class="pulse mini" aria-hidden="true"></span>
           <span id="autoUpdateStatus">15 分钟自动更新</span>
+        </div>
+      </section>
+
+      <section class="mentor-panel" aria-labelledby="mentor-title">
+        <div class="panel-head mentor-head">
+          <div>
+            <p class="eyebrow">Three-Analyst Fusion</p>
+            <h2 id="mentor-title">三师融合推演</h2>
+            <p>把截图里的轨迹连线、热冷结构、区间指标三种套路拆开计算，再融合成可见过程和两注输出。</p>
+          </div>
+          <span class="tag" id="mentorIssue">等待数据</span>
+        </div>
+        <div class="mentor-methods" id="mentorMethods"></div>
+        <div class="mentor-output">
+          <div class="mentor-candidates">
+            <div class="subhead">
+              <span>融合候选池</span>
+              <strong id="mentorShape">--</strong>
+            </div>
+            <div class="mentor-pool" id="mentorPool"></div>
+          </div>
+          <div class="mentor-result">
+            <div class="subhead">
+              <span>最终产出</span>
+              <strong>2 注</strong>
+            </div>
+            <div class="mentor-combos" id="mentorCombos"></div>
+          </div>
         </div>
       </section>
 
@@ -240,6 +268,6 @@
       </p>
     </main>
 
-    <script src="./app.js?v=20260623-probability" type="module"></script>
+    <script src="./app.js?v=20260702-mentor-fusion-2" type="module"></script>
   </body>
 </html>

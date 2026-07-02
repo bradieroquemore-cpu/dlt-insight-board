@@ -131,6 +131,7 @@ textarea {
 
 .topbar,
 .toolbar,
+.mentor-panel,
 .draw-strip,
 .panel {
   border: 2px solid var(--line);
@@ -271,6 +272,107 @@ h2 {
   font-size: 13px;
   font-weight: 900;
   box-shadow: 4px 4px 0 #000;
+}
+
+.mentor-panel {
+  position: relative;
+  overflow: hidden;
+  margin-top: 14px;
+  border-color: var(--green);
+  background:
+    linear-gradient(135deg, rgba(217, 255, 63, 0.15), transparent 42%),
+    linear-gradient(315deg, rgba(55, 184, 255, 0.14), transparent 36%),
+    #10120d;
+  padding: 18px;
+}
+
+.mentor-head {
+  margin-bottom: 14px;
+}
+
+.mentor-head h2 {
+  color: var(--green);
+  font-size: 24px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.mentor-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mentor-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(13, 15, 11, 0.86);
+  padding: 14px;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.mentor-card > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.mentor-card h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.mentor-card p,
+.mentor-card strong {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.mentor-card strong {
+  color: var(--ink);
+}
+
+.mentor-weight {
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  color: var(--green);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.mentor-output {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mentor-candidates,
+.mentor-result {
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(13, 15, 11, 0.78);
+  padding: 14px;
+}
+
+.mentor-pool,
+.mentor-combos {
+  display: grid;
+  gap: 12px;
+}
+
+.mentor-combo {
+  grid-template-columns: auto 1fr;
+  border-color: var(--gold);
+  margin: 0;
 }
 
 .draw-strip {
@@ -817,8 +919,13 @@ h2 {
 
 @media (max-width: 980px) {
   .topbar,
+  .mentor-output,
   .draw-strip,
   .wide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mentor-methods {
     grid-template-columns: 1fr;
   }
 
@@ -863,6 +970,7 @@ h2 {
   }
 
   .topbar,
+  .mentor-panel,
   .panel {
     padding: 14px;
   }
