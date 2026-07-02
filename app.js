@@ -1,3 +1,7 @@
+if (location.protocol === "file:") {
+  location.replace("https://bradieroquemore-cpu.github.io/dlt-insight-board/");
+}
+
 const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
 const HISTORY_API = IS_GITHUB_PAGES ? null : "/api/history";
 const PUBLIC_SAMPLE_API = IS_GITHUB_PAGES ? null : "/api/public-samples";
